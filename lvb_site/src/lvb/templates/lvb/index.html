@@ -1,0 +1,57 @@
+{% extends 'lvb/base.html' %}
+
+{% block input_content %}
+           <div class="row">
+             <div class="col-md-10">
+              <div class="alert alert-info">
+              {{ sz_info_privacy }} <br>If you want to select other option please press <a data-toggle="modal" data-target="#chosseOtherOption" href="#">here</a>.</div>
+              
+              {% include "lvb/chooseOtherOption.html" %}
+              
+              <div class="panel panel-success">
+              <div class="panel-heading">
+                 <h3 class="panel-title">Sequences in FASTA format.</h3>
+              </div>
+             
+              <div class="panel-body">
+				<form role="form" method=post action="/lvb/" enctype=multipart/form-data>
+				  {% csrf_token %}
+                  <div class="form-group">
+				      <textarea cols=150 rows=10 class="form-control" name="sequence" style="font-weight: bold; font-family: Courier;font-size: 8pt;">{{ file_model.sz_sequences }}</textarea>
+				  </div>
+				
+				  {% if error_message %}<div class="alert alert-danger" role="alert">{{ error_message }}</div>{% endif %}
+				  <div class="form-group">
+				      	<button type="submit" class="btn btn-primary" name="submit"><i class="fa fa-upload"></i> Submit </button>
+				      	<button type="submit" class="btn btn-primary" name="clean" value="clean"><i class="fa fa-times"></i> Clean </button>
+				      	<button type="submit" type="button" class="btn btn-primary" name="example" value="example"><i class="fa fa-magic"></i> Example </button>
+                  </div>
+			    </form>
+			   </div>
+              </div>
+             </div>
+
+
+			<div class="col-md-10">
+              <div class="panel panel-success">
+              <div class="panel-heading">
+                 <h3 class="panel-title">Or upload a FASTA file. (gzip, gz and zip format also accepted)</h3>
+              </div>
+             
+              {% if error_message_file %}<div class="alert alert-danger" role="alert">{{ error_message_file }}</div>{% endif %}
+              <div class="panel-body">
+				<form role="form" method=post action="/lvb/" enctype=multipart/form-data>
+                  {% csrf_token %}
+				  <div class="form-group">
+					  <input type="file" name="file" value="{{file_model.file_name}}">
+					  <input type="hidden" name="id" value="1">
+					  <input type="hidden" name="proname" value="xpto">
+				  </div>
+				  <button type="submit" class="btn btn-primary" name="upload"><i class="fa fa-upload"></i> Upload </button>
+			    </form>
+			   </div>
+              </div>
+             </div>
+           </div>
+           
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'lvb/base.html' %}
+
+{% block result_content %}
+
+           <div class="row">
+             <div class="col-md-10">
+              <div class="panel panel-success">
+{% if get_key %}	<!-- Only get key -->
+              <div class="panel-heading">
+                 <h3 class="panel-title">Get result</h3>
+              </div>
+              
+              <div class="panel-body">
+                {% if error_message %} <div class="alert alert-danger" role="alert">Error: {{ error_message }}</div>{% endif %}
+                
+				<form role="form" method=post enctype=multipart/form-data>
+				  {% csrf_token %}
+                  <div class="form-group">
+				       <input class="form-control" name="key_id" style="font-weight: normal; font-family: Courier;font-size: 14pt;" value="{{ sz_key }}"/>
+				  </div>
+
+				  <p class="text-info">Example: 8MM7CK_a304a120e2e00d9b4e8124e8081e8587</p>
+				  <div class="form-group">
+				      <button type="submit" class="btn btn-primary" name="refresh"><i class="fa fa-refresh"></i> Get results </button>
+   				  </div>
+			    </form>
+			   </div>
+				
+{% else %}
+	              <div class="panel-heading">
+	                 <h3 class="panel-title">Results</h3>
+	              </div>
+	              <div class="panel-body">
+					  
+	{% if not file_model.is_finished %}
+				{% if not file_model.is_processing %}
+					<div class="alert alert-info" role="alert">Result ID: {{ file_model.key_id }}</div>
+					<p class="text-info">The LVB is processing the sequences...</p>
+				{% else %}
+				    <div class="alert alert-info" role="alert">Result ID: {{ file_model.key_id }}</div>
+					<p class="text-info">The LVB is queued in Open Grid Engine (OGE) </p>
+				{% endif %}
+				
+				<!-- alert messages -->
+				{% if sz_info %} <div class="alert alert-info" role="alert">
+	 			    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	 				{{ sz_info }} </div> 
+	 		    {% endif %}
+	 			{% if error_message_email %} <div class="alert alert-danger" role="alert">
+	 			    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	 				{{ error_message_email }} </div> 
+	 		    {% endif %}
+				<form role="form" method=post enctype=multipart/form-data>
+					{% csrf_token %}
+					<div class="form-group">
+					    <button type="submit" class="btn btn-primary" name="refresh"><i class="fa fa-refresh"></i> Refresh </button>
+					    <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#sendEmail"><i class="fa fa-at"></i> Send ID by email </button>
+					</div>
+				 </form>
+				 
+				 {% include "lvb/sendEmail.html" %}
+	{% else %}
+		{% if error_message %}
+		
+			<div class="form-group">
+	 			<div class="alert alert-info" role="alert">Job ID: {{ file_model.key_id }} </div>
+	 			{% if error_message %} <div class="alert alert-danger" role="alert">{{ error_message }} </div> {% endif %}
+	 		</div>
+	 	{% else %}
+				<div class="form-group">
+	 				<div class="alert alert-info" role="alert">Job ID: {{ file_model.key_id }} </div>
+	 				{% if sz_info %} <div class="alert alert-info" role="alert">
+	 				  <a href="#" class="close" data-dismiss="alert">&times;</a>
+	 				  {{ sz_info }} </div> 
+	 				{% endif %}
+	 				{% if error_message_email %} <div class="alert alert-danger" role="alert">
+	 				  <a href="#" class="close" data-dismiss="alert">&times;</a>
+	 				  {{ error_message_email }} </div> 
+	 				{% endif %}
+	 				<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#sendEmail"><i class="fa fa-at"></i> Send ID by email </button>
+	 			</div>	
+
+				{% include "lvb/sendEmail.html" %}
+	    		
+	    		<div class="tabbable">
+		          <ul class="nav nav-tabs">
+		            <li class="active"><a href="#one" data-toggle="tab">Report</a></li>
+		            <li><a href="#two" data-toggle="tab">Out tree(s)</a></li>
+		            <li><a href="#three" data-toggle="tab">LVB output</a></li>
+		          </ul>
+		          <div class="tab-content">
+		            <div class="tab-pane fade in active" id="one">
+		            	<br>
+		            	<table id="table-format" class="table table-striped table-bordered" data-row-style="rowStyle" data-show-header="false">
+						    <tbody>
+						    <tr>
+						        <th data-halign="right">Input species</th>
+						        <th data-halign="left">{{ file_model.n_species }}</th></tr>
+						    <tr>   
+						     	<th data-halign="right">Sequences length</th>
+						     	<th data-halign="left">{{ file_model.n_length_sequences }}</th></tr>
+						    <tr>   
+						     	<th data-halign="right">LVB starting temperature</th>
+						     	<th data-halign="left">{{ file_model.lvb_starting_temperature }}</th></tr>
+						    <tr>   
+						     	<th data-halign="right">LVB iterations</th>
+						     	<th data-halign="left">{{ file_model.lvb_iterations }}</th></tr>
+						    <tr>   
+						     	<th data-halign="right">Tree length</th>
+						     	<th data-halign="left">{{ file_model.lvb_length }}</th></tr>
+						    <tr>   
+						     	<th data-halign="right">Output trees</th>
+						     	<th data-halign="left">{{ file_model.lvb_trees }}</th></tr>
+						    <tr>   
+						     	<th data-halign="right">Start seed</th>
+						     	<th data-halign="left">{{ file_model.lvb_seed }}</th></tr>
+						    </tbody>
+						</table>
+
+			        </div>
+			        
+		            <div class="tab-pane fade" id="two">
+		                <div >
+		                  <br>
+		                  <a href="/lvb/result_tree_lvb/{{ file_model.key_id }} " class="btn btn-info" role="button" download><i class="fa fa-download"></i> Tree_lvb_ouput.txt </a>
+		                  <div class="alert alert-info" role="alert">{{ lvb_message_tree }}</div>
+		                  {{ lvb_tree_output|safe }}
+		                </div>
+		            </div>
+		            
+		            <div class="tab-pane fade" id="three">
+		                <div >
+		                  <br>
+		                  <a href="/lvb/result_output_lvb/{{ file_model.key_id }} " class="btn btn-info" role="button" download><i class="fa fa-download"></i> LVB_ouput.txt </a>
+		                  {{ lvb_output|safe }}
+		                </div>
+		            </div>
+		            
+		           </div>
+		        </div>
+
+	   {% endif %}        
+	{% endif %}
+				   
+				   </div>
+{% endif %}
+              </div>
+             </div>
+           </div>
+           
+{% endblock %}
